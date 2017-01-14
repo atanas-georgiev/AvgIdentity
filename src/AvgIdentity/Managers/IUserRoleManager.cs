@@ -27,7 +27,7 @@
 
         Task AddUserExternalLoginInfoAsync(TUser user, ExternalLoginInfo info);
 
-        Task AddUserInRole(TUser user, string role);
+        Task AddUserInRoleAsync(TUser user, string role);
 
         Task<bool> ChangePasswordAsync(TUser user, string oldPassword, string newPassword);
 

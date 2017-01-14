@@ -48,7 +48,7 @@
                 {
                     if (role != null)
                     {
-                        await this.AddUserInRole(user, role);
+                        await this.AddUserInRoleAsync(user, role);
                     }
 
                     return user;
@@ -83,7 +83,7 @@
             await this.UserManager.AddLoginAsync(user, info);
         }
 
-        public async Task AddUserInRole(TUser user, string role)
+        public async Task AddUserInRoleAsync(TUser user, string role)
         {
             if (!(await this.UserManager.IsInRoleAsync(user, role)))
             {
