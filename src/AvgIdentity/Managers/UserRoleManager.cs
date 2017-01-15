@@ -27,10 +27,28 @@
 
         protected UserManager<TUser> UserManager { get; set; }
 
-        public void AddRoles(IEnumerable<string> roles)
+        public async Task<bool> AddRoleAsync(IEnumerable<string> roles)
         {
-            this.Context.Roles.AddRange(roles.Select(r => new IdentityRole(r)));
-            this.Context.SaveChanges();
+            if (this.Context.Roles.Any(r => roles.Contains(r.Name)))
+            {
+                return false;
+            }
+
+            await this.Context.Roles.AddRangeAsync(roles.Select(r => new IdentityRole(r)));
+            var result = await this.Context.SaveChangesAsync();
+            return result != 0;
+        }
+
+        public async Task<bool> AddRoleAsync(string role)
+        {
+            if (this.Context.Roles.Any(r => string.CompareOrdinal(r.Name, role) == 0))
+            {
+                return false;
+            }
+
+            await this.Context.Roles.AddAsync(new IdentityRole(role));
+            var result = await this.Context.SaveChangesAsync();
+            return result != 0;
         }
 
         public virtual async Task<TUser> AddUserAsync(TUser user, string password, string role = null)
@@ -147,15 +165,29 @@
 
         public TUser GetUser(string email) => this.UserManager.Users.FirstOrDefault(u => u.Email == email);
 
-        public bool RemoveRoles(IEnumerable<string> roles)
+        public async Task<bool> RemoveRoleAsync(string role)
+        {
+            if (!this.GetAllUsersinRole(role).Any())
+            {
+                var roleDb = this.Context.Roles.FirstOrDefault(x => x.Name == role);
+
+                this.Context.Remove(roleDb);
+                var result = await this.Context.SaveChangesAsync();
+                return result != 0;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> RemoveRoleAsync(IEnumerable<string> roles)
         {
             if (roles.All(role => !this.GetAllUsersinRole(role).Any()))
             {
                 var rolesDb = this.Context.Roles.Where(x => roles.Contains(x.Name));
 
                 this.Context.RemoveRange(rolesDb);
-                this.Context.SaveChanges();
-                return true;
+                var result = await this.Context.SaveChangesAsync();
+                return result != 0;
             }
 
             return false;

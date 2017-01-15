@@ -12,7 +12,9 @@
     public interface IUserRoleManager<TUser, TContext>
         where TUser : AvgIdentityUser, new() where TContext : IdentityDbContext<TUser>
     {
-        void AddRoles(IEnumerable<string> roles);
+        Task<bool> AddRoleAsync(IEnumerable<string> roles);
+
+        Task<bool> AddRoleAsync(string role);
 
         Task<TUser> AddUserAsync(TUser user, string password, string role = null);
 
@@ -45,7 +47,9 @@
 
         TUser GetUser(string email);
 
-        bool RemoveRoles(IEnumerable<string> roles);
+        Task<bool> RemoveRoleAsync(string role);
+
+        Task<bool> RemoveRoleAsync(IEnumerable<string> roles);
 
         Task<bool> ResetPasswordAsync(TUser user, string passwordAnswer, string newPassword);
 

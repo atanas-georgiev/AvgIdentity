@@ -1,0 +1,39 @@
+﻿@model IEnumerable<RoleViewModel>
+
+@{
+    ViewData["Title"] = "Roles list";
+}
+
+<h2>Roles list</h2>
+<br />
+
+<p>
+    <a asp-action="AddRole">Add New Role</a>
+</p>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+       
+            <td>
+                @Html.ActionLink("Update", "Edit", new { id = item.Name }) |
+                @Html.ActionLink("Details", "Details", new { id = item.Name }) |
+                <a asp-action="RemoveRole" asp-route-id="@item.Name">Remove</a>
+            </td>
+        </tr>
+    }
+
+</table>

@@ -70,7 +70,8 @@
                 throw new AvgIdentityConfigurationException("AvgIdentity InitialData error");
             }
 
-            userRoleManager.AddRoles(roles);
+            // TODO: asdada
+            // userRoleManager.AddRoles(roles);
         }
 
         private static async Task SeedUsers<TUser, TContext>(

@@ -1,5 +1,7 @@
 ﻿namespace WebApp
 {
+    using AutoMapper;
+
     using AvgIdentity.Extensions;
     using AvgIdentity.Managers;
     using AvgIdentity.Models;
@@ -60,6 +62,7 @@
 
             services.AddAvgIdentityServices<WebAppDbContext, AvgIdentityUser>(this.Configuration);
 
+            services.AddAutoMapper();
 
             // Add framework services.
             services.AddMvc();
