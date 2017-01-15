@@ -74,7 +74,11 @@
                 user.UserName = user.Email;
 
                 var hasher = new PasswordHasher<TUser>();
-                user.PasswordAnswerHash = hasher.HashPassword(user, user.PasswordAnswerHash);
+
+                if (!string.IsNullOrEmpty(user.PasswordAnswerHash))
+                {
+                    user.PasswordAnswerHash = hasher.HashPassword(user, user.PasswordAnswerHash);
+                }
 
                 var result = await this.UserManager.CreateAsync(user, password ?? InitialPassword);
 
@@ -101,6 +105,11 @@
             string lastName = null,
             string role = null)
         {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                return null;
+            }
+
             var user = new TUser
                            {
                                Email = email,

@@ -1,5 +1,6 @@
 namespace AvgIdentity.Test
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -7,21 +8,64 @@ namespace AvgIdentity.Test
     using AvgIdentity.Models;
     using AvgIdentity.Test.Mocks;
 
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Features.Authentication;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+    using Microsoft.EntityFrameworkCore;
+
+    using Moq;
+
+    public class DatabaseSetupTests : IDisposable
+    {
+
+
+        public DatabaseSetupTests()
+        {
+            
+        }
+
+        public void Dispose()
+        {
+        }
+    }
 
     [TestClass]
     public class UserRoleManagerTests
     {
+        private UserManager<AvgIdentityUser> userManager { get; set; }
+
         private TestInMemoryIdentityDbContext testDbContext;
 
         private UserRoleManager<AvgIdentityUser, TestInMemoryIdentityDbContext> userRoleManager;
 
+        private SignInManager<AvgIdentityUser> signInManager;
+
         [TestInitialize]
         public void TestStart()
         {
-            this.testDbContext = new TestInMemoryIdentityDbContext();
-            this.userRoleManager = new UserRoleManager<AvgIdentityUser, TestInMemoryIdentityDbContext>(null, null, this.testDbContext);
+            var services = new ServiceCollection();
+            services.AddEntityFramework()
+                .AddEntityFrameworkInMemoryDatabase()
+                .AddDbContext<TestInMemoryIdentityDbContext>(options => options.UseInMemoryDatabase());
+            services.AddIdentity<AvgIdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<TestInMemoryIdentityDbContext>();
+            // Taken from https://github.com/aspnet/MusicStore/blob/dev/test/MusicStore.Test/ManageControllerTest.cs (and modified)
+            // IHttpContextAccessor is required for SignInManager, and UserManager
+            var context = new DefaultHttpContext();
+            context.Features.Set<IHttpAuthenticationFeature>(new HttpAuthenticationFeature());
+            services.AddSingleton<IHttpContextAccessor>(h => new HttpContextAccessor { HttpContext = context });
+            var serviceProvider = services.BuildServiceProvider();
+            this.testDbContext = serviceProvider.GetRequiredService<TestInMemoryIdentityDbContext>();
+            this.userManager = serviceProvider.GetRequiredService<UserManager<AvgIdentityUser>>();
+
+            //this.signInManager = new SignInManager<AvgIdentityUser>();
+            //this.testDbContext = new TestInMemoryIdentityDbContext();
+            this.userRoleManager = new UserRoleManager<AvgIdentityUser, TestInMemoryIdentityDbContext>(this.userManager, null, this.testDbContext);
         }
 
         [TestCleanup]
@@ -70,6 +114,35 @@ namespace AvgIdentity.Test
             res = this.userRoleManager.AddRoleAsync(new[] { "Role3", "Role4" }).Result;
             Assert.IsFalse(res, "AddRoleAsync do add multiple roles if role already exists");
             Assert.IsTrue(this.userRoleManager.GetAllRoles().Count() == 3, "AddRoleAsync do add multiple roles if role already exists");
+        }
+
+        [TestMethod]
+        public void AddUserssShouldBehaveCorrectly()
+        {
+    //        Task<TUser> AddUserAsync(
+    //string email,
+    //string password,
+    //string question = null,
+    //string answer = null,
+    //string firstName = null,
+    //string lastName = null,
+    //string role = null);
+
+            // null email, empty email
+            // duplicate email
+            // null password, empty password, short password
+            // invalid email
+            // long email, long password
+            // long question, long firstname, long lastname
+            // invalid role, empty role
+
+            
+            bool res;
+
+            var user = this.userRoleManager.AddUserAsync("avg@gbg.bg", "Mypassword@1").Result;
+
+            var users = this.userRoleManager.GetAllUsers().Count();
+
         }
 
         [TestMethod]
