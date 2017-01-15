@@ -27,6 +27,7 @@
     <PackageReference Include="MSTest.TestFramework">
       <Version>1.0.8-rc2</Version>
     </PackageReference>
+    <PackageReference Include="NUnit" Version="3.6.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore">

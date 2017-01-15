@@ -29,18 +29,34 @@
 
         public async Task<bool> AddRoleAsync(IEnumerable<string> roles)
         {
-            if (this.Context.Roles.Any(r => roles.Contains(r.Name)))
+            if (roles == null)
             {
                 return false;
             }
 
-            await this.Context.Roles.AddRangeAsync(roles.Select(r => new IdentityRole(r)));
+            var rolesList = roles as IList<string> ?? roles.ToList();
+            if (rolesList.Any(string.IsNullOrEmpty))
+            {
+                return false;
+            }
+
+            if (this.Context.Roles.Any(r => rolesList.Contains(r.Name)))
+            {
+                return false;
+            }
+
+            await this.Context.Roles.AddRangeAsync(rolesList.Select(r => new IdentityRole(r)));
             var result = await this.Context.SaveChangesAsync();
             return result != 0;
         }
 
         public async Task<bool> AddRoleAsync(string role)
         {
+            if (string.IsNullOrEmpty(role))
+            {
+                return false;
+            }
+
             if (this.Context.Roles.Any(r => string.CompareOrdinal(r.Name, role) == 0))
             {
                 return false;
@@ -167,10 +183,15 @@
 
         public async Task<bool> RemoveRoleAsync(string role)
         {
+            var roleDb = this.Context.Roles.FirstOrDefault(x => x.Name == role);
+
+            if (roleDb == null)
+            {
+                return false;
+            }
+
             if (!this.GetAllUsersinRole(role).Any())
             {
-                var roleDb = this.Context.Roles.FirstOrDefault(x => x.Name == role);
-
                 this.Context.Remove(roleDb);
                 var result = await this.Context.SaveChangesAsync();
                 return result != 0;
