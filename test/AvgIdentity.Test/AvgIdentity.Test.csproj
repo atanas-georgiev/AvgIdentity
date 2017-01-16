@@ -21,8 +21,8 @@
       <Version>15.0.0-preview-20170113-02</Version>
     </PackageReference>
     <PackageReference Include="Moq" Version="4.6.38-alpha" />
-    <PackageReference Include="NUnit" Version="3.6.0" />
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
+    <PackageReference Include="xunit.runner.console" Version="2.2.0-beta4-build3444" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
   </ItemGroup>
   <ItemGroup>
