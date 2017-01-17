@@ -12,6 +12,7 @@ before_build:
 build:
   verbosity: minimal
   
-test:
-  assemblies:
-    - '**\*.test.dll'
+after_build:
+- dotnet test
+  
+test: off

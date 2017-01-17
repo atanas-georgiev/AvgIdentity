@@ -106,7 +106,7 @@ namespace AvgIdentity.Test
         }
 
         [Fact]
-        public void AddUserssShouldBehaveCorrectly()
+        public void AddUsersShouldBehaveCorrectly()
         {
     //        Task<TUser> AddUserAsync(
     //string email,
@@ -126,12 +126,22 @@ namespace AvgIdentity.Test
             // invalid role, empty role
 
             
-            bool res;
+            AvgIdentityUser user;
 
-            var user = this.userRoleManager.AddUserAsync("avg@gbg.bg", "Mypassword@1").Result;
+            // null email
+            user = this.userRoleManager.AddUserAsync(email: null, password: "Password@1").Result;
+            Assert.Null(user);
+            Assert.True(this.userRoleManager.GetAllUsers().Count() == 0, "AddUserAsync adds user with null email");
 
-            var users = this.userRoleManager.GetAllUsers().Count();
+            // null user
+            user = this.userRoleManager.AddUserAsync(user: null, password: "Password@1").Result;
+            Assert.Null(user);
+            Assert.True(this.userRoleManager.GetAllUsers().Count() == 0, "AddUserAsync adds user with null object");
 
+            // null password
+            user = this.userRoleManager.AddUserAsync("user@test.com", null).Result;
+            Assert.Null(user);
+            Assert.True(this.userRoleManager.GetAllUsers().Count() == 0, "AddUserAsync adds user with null password");
         }
 
         [Fact]
