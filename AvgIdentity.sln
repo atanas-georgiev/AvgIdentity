@@ -11,11 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvgIdentity.Models", "src\A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{C5EAA1B8-AFC2-4DF5-AB04-7F1AB17F55B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvgIdentity.Test", "test\AvgIdentity.Test\AvgIdentity.Test.csproj", "{96D00402-E977-479F-B025-25A66291E9F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvgIdentity.Test", "test\AvgIdentity.Test\AvgIdentity.Test.csproj", "{96D00402-E977-479F-B025-25A66291E9F1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B0491072-52F6-40AF-B57C-4894C830A7E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "samples\WebApp\WebApp.csproj", "{35DED6A4-6A69-4651-8537-E203547FA95E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp", "samples\WebApp\WebApp.csproj", "{35DED6A4-6A69-4651-8537-E203547FA95E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

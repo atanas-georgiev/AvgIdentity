@@ -35,9 +35,11 @@
 
         Task<bool> CheckPasswordAsync(TUser user, string password);
 
-        Task<bool> DeleteUserAsync(TUser user);
+        Task<bool> RemoveUserAsync(TUser user);
 
-        Task<bool> DeleteUserAsync(string email);
+        Task<bool> RemoveUserAsync(string email);
+
+        Task<bool> RemoveUserAsync(IEnumerable<TUser> users);
 
         IQueryable<string> GetAllRoles();
 

@@ -1,5 +1,6 @@
 ﻿namespace AvgIdentity.Managers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -69,6 +70,26 @@
 
         public virtual async Task<TUser> AddUserAsync(TUser user, string password, string role = null)
         {
+            if (string.IsNullOrEmpty(password))
+            {
+                return null;
+            }
+
+            if(string.CompareOrdinal(role, string.Empty) == 0)
+            {
+                return null;
+            }
+
+            if (role != null)
+            {
+                var roleDb = this.GetAllRoles().FirstOrDefault(x => x == role);
+
+                if (roleDb == null)
+                {
+                    return null;
+                }
+            }
+
             if (user != null)
             {
                 user.UserName = user.Email;
@@ -151,13 +172,13 @@
             return await this.UserManager.CheckPasswordAsync(user, password);
         }
 
-        public async Task<bool> DeleteUserAsync(TUser user)
+        public async Task<bool> RemoveUserAsync(TUser user)
         {
             var result = await this.UserManager.DeleteAsync(user);
             return result.Succeeded;
         }
 
-        public async Task<bool> DeleteUserAsync(string email)
+        public async Task<bool> RemoveUserAsync(string email)
         {
             var user = this.GetUser(email);
 
@@ -166,13 +187,10 @@
                 return false;
             }
 
-            return await this.DeleteUserAsync(user);
+            return await this.RemoveUserAsync(user);
         }
 
-        public IQueryable<string> GetAllRoles()
-        {
-            return this.Context.Roles.Select(r => r.Name);
-        }
+        public IQueryable<string> GetAllRoles() => this.Context.Roles.Select(r => r.Name);
 
         public IQueryable<TUser> GetAllUsers() => this.UserManager.Users;
 
@@ -192,8 +210,12 @@
 
         public async Task<bool> RemoveRoleAsync(string role)
         {
-            var roleDb = this.Context.Roles.FirstOrDefault(x => x.Name == role);
+            if (string.IsNullOrEmpty(role))
+            {
+                return false;
+            }
 
+            var roleDb = this.Context.Roles.FirstOrDefault(x => x.Name == role);
             if (roleDb == null)
             {
                 return false;
@@ -211,6 +233,24 @@
 
         public async Task<bool> RemoveRoleAsync(IEnumerable<string> roles)
         {
+            if (roles == null)
+            {
+                return false;
+            }
+
+            if (roles.Count() == 0)
+            {
+                return false;
+            }
+
+            foreach (var role in roles)
+            {
+                if (string.IsNullOrEmpty(role))
+                {
+                    return false;
+                }
+            }
+
             if (roles.All(role => !this.GetAllUsersinRole(role).Any()))
             {
                 var rolesDb = this.Context.Roles.Where(x => roles.Contains(x.Name));
@@ -284,6 +324,31 @@
         {
             var result = await this.UserManager.UpdateAsync(user);
             return result.Succeeded;
+        }
+
+        public async Task<bool> RemoveUserAsync(IEnumerable<TUser> users)
+        {
+            if (users == null)
+            {
+                return false;
+            }
+
+            if (users.Count() == 0)
+            {
+                return false;
+            }
+
+            foreach (var user in users)
+            {
+                var result = await this.RemoveUserAsync(user);
+
+                if (!result)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
