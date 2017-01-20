@@ -13,6 +13,4 @@ build:
   verbosity: minimal
   
 after_build:
-- dotnet test
-  
-test: off
+- dotnet test test\AvgIdentity.Test\AvgIdentity.Test.csproj
