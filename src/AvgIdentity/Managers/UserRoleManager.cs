@@ -147,18 +147,50 @@
             await this.UserManager.AddLoginAsync(user, info);
         }
 
-        public async Task AddUserInRoleAsync(TUser user, string role)
+        public async Task<bool> AddUserInRoleAsync(TUser user, string role)
         {
-            if (!(await this.UserManager.IsInRoleAsync(user, role)))
+            if (user == null)
             {
-                this.Context.UserRoles.Add(
-                    new IdentityUserRole<string>()
-                        {
-                            RoleId = this.Context.Roles.First(x => x.Name == role).Id,
-                            UserId = user.Id
-                        });
-                this.Context.SaveChanges();
+                return false;
             }
+
+            var userDb = this.GetUser(user.Email);
+            if (userDb == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(role))
+            {
+                return false;
+            }
+
+            var roleDb = this.Context.Roles.First(r => string.CompareOrdinal(r.Name, role) == 0);
+            if (roleDb == null)
+            {
+                return false;
+            }
+
+            var userInRole = await this.UserManager.IsInRoleAsync(user, role);
+            if (!userInRole)
+            {
+                await this.Context.UserRoles.AddAsync(
+                    new IdentityUserRole<string>()
+                    {
+                        RoleId = roleDb.Id,
+                        UserId = userDb.Id
+                    });
+
+                var result = await this.Context.SaveChangesAsync();
+                return result != 0;
+            }
+
+            return false;
+        }
+
+        public Task<bool> AddUserInRoleAsync(TUser user, IEnumerable<string> roles)
+        {
+            return null;
         }
 
         public async Task<bool> ChangePasswordAsync(TUser user, string oldPassword, string newPassword)
@@ -174,12 +206,22 @@
 
         public async Task<bool> RemoveUserAsync(TUser user)
         {
+            if (user == null)
+            {
+                return false;
+            }
+
             var result = await this.UserManager.DeleteAsync(user);
             return result.Succeeded;
         }
 
         public async Task<bool> RemoveUserAsync(string email)
         {
+            if (string.IsNullOrEmpty(email))
+            {
+                return false;
+            }
+
             var user = this.GetUser(email);
 
             if (user == null)
@@ -322,6 +364,13 @@
 
         public async Task<bool> UpdateUserAsync(TUser user)
         {
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.UserName = user.Email;
+
             var result = await this.UserManager.UpdateAsync(user);
             return result.Succeeded;
         }
@@ -349,6 +398,63 @@
             }
 
             return true;
+        }
+
+        public async Task<bool> RemoveUserFromRoleAsync(TUser user, string role)
+        {
+            // todo: check this
+            //var res = await this.CheckUserInRoleAsync(user, role);
+            //if (res == false)
+            //{
+            //    return false;
+            //}
+
+            var userDb = this.GetUser(user.Email);
+            var roleDb = this.Context.Roles.First(r => string.CompareOrdinal(r.Name, role) == 0);
+
+            var userRole = this.Context.UserRoles.FirstOrDefault(ur => ur.RoleId == roleDb.Id && ur.UserId == userDb.Id);
+
+            if (userRole == null)
+            {
+                return false;
+            }
+
+            this.Context.UserRoles.Remove(userRole);
+
+            var result = await this.Context.SaveChangesAsync();
+            return result != 0;
+        }
+
+        public Task<bool> RemoveUserFromRoleAsync(TUser user, IEnumerable<string> roles)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> CheckUserInRoleAsync(TUser user, string role)
+        {
+            if (user == null)
+            {
+                return false;
+            }
+
+            var userDb = this.GetUser(user.Email);
+            if (userDb == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(role))
+            {
+                return false;
+            }
+
+            var roleDb = this.Context.Roles.First(r => string.CompareOrdinal(r.Name, role) == 0);
+            if (roleDb == null)
+            {
+                return false;
+            }
+
+            return await this.UserManager.IsInRoleAsync(user, role);
         }
     }
 }

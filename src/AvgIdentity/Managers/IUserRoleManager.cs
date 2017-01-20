@@ -29,11 +29,15 @@
 
         Task AddUserExternalLoginInfoAsync(TUser user, ExternalLoginInfo info);
 
-        Task AddUserInRoleAsync(TUser user, string role);
+        Task<bool> AddUserInRoleAsync(TUser user, string role);
+
+        Task<bool> AddUserInRoleAsync(TUser user, IEnumerable<string> roles);
 
         Task<bool> ChangePasswordAsync(TUser user, string oldPassword, string newPassword);
 
         Task<bool> CheckPasswordAsync(TUser user, string password);
+
+        Task<bool> CheckUserInRoleAsync(TUser user, string role);
 
         Task<bool> RemoveUserAsync(TUser user);
 
@@ -52,6 +56,10 @@
         Task<bool> RemoveRoleAsync(string role);
 
         Task<bool> RemoveRoleAsync(IEnumerable<string> roles);
+
+        Task<bool> RemoveUserFromRoleAsync(TUser user, string role);
+
+        Task<bool> RemoveUserFromRoleAsync(TUser user, IEnumerable<string> roles);
 
         Task<bool> ResetPasswordAsync(TUser user, string passwordAnswer, string newPassword);
 

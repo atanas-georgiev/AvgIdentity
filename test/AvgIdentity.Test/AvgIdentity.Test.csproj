@@ -1,5 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <PropertyGroup Label="Configuration">
+    <OutputPath>bin\</OutputPath>
+  </PropertyGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
@@ -9,6 +12,7 @@
     <EmbeddedResource Include="**\*.resx" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeCoverage" Version="1.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="1.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170113-02" />
     <PackageReference Include="Microsoft.NETCore.App">
@@ -21,14 +25,7 @@
     <PackageReference Include="Moq" Version="4.6.38-alpha" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.1.10-rc2" />
     <PackageReference Include="MSTest.TestFramework" Version="1.0.8-rc2" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore">
-      <HintPath>C:\Users\atana\.nuget\packages\microsoft.aspnetcore.identity.entityframeworkcore\1.1.0\lib\netstandard1.3\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.EntityFrameworkCore">
-      <HintPath>C:\Users\atana\.nuget\packages\microsoft.entityframeworkcore\1.1.0\lib\netstandard1.3\Microsoft.EntityFrameworkCore.dll</HintPath>
-    </Reference>
+    <PackageReference Include="ReportGenerator" Version="2.5.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\AvgIdentity.Models\AvgIdentity.Models.csproj" />

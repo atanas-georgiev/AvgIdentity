@@ -81,7 +81,7 @@
             try
             {
                 // TODO: add reflection
-                var userref = typeof(TUser).GetTypeInfo().GetProperties();
+                //var userref = typeof(TUser).GetTypeInfo().GetProperties();
 
                 var users =
                     configuration.GetSection("AvgIdentity")
