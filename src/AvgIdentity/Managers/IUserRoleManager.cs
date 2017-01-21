@@ -39,12 +39,6 @@
 
         Task<bool> CheckUserInRoleAsync(TUser user, string role);
 
-        Task<bool> RemoveUserAsync(TUser user);
-
-        Task<bool> RemoveUserAsync(string email);
-
-        Task<bool> RemoveUserAsync(IEnumerable<TUser> users);
-
         IQueryable<string> GetAllRoles();
 
         IQueryable<TUser> GetAllUsers();
@@ -56,6 +50,12 @@
         Task<bool> RemoveRoleAsync(string role);
 
         Task<bool> RemoveRoleAsync(IEnumerable<string> roles);
+
+        Task<bool> RemoveUserAsync(TUser user);
+
+        Task<bool> RemoveUserAsync(string email);
+
+        Task<bool> RemoveUserAsync(IEnumerable<TUser> users);
 
         Task<bool> RemoveUserFromRoleAsync(TUser user, string role);
 

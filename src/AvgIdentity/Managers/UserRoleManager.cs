@@ -1,6 +1,5 @@
 ﻿namespace AvgIdentity.Managers
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -75,7 +74,7 @@
                 return null;
             }
 
-            if(string.CompareOrdinal(role, string.Empty) == 0)
+            if (string.CompareOrdinal(role, string.Empty) == 0)
             {
                 return null;
             }
@@ -149,37 +148,23 @@
 
         public async Task<bool> AddUserInRoleAsync(TUser user, string role)
         {
-            if (user == null)
+            if (!this.CheckDbUser(user))
             {
                 return false;
             }
 
-            var userDb = this.GetUser(user.Email);
-            if (userDb == null)
+            if (!this.CheckDbRole(role))
             {
                 return false;
             }
 
-            if (string.IsNullOrEmpty(role))
-            {
-                return false;
-            }
+            var roleDb = this.Context.Roles.FirstOrDefault(r => string.CompareOrdinal(r.Name, role) == 0);
+            var userInRole = await this.CheckUserInRoleAsync(user, role);
 
-            var roleDb = this.Context.Roles.First(r => string.CompareOrdinal(r.Name, role) == 0);
-            if (roleDb == null)
-            {
-                return false;
-            }
-
-            var userInRole = await this.UserManager.IsInRoleAsync(user, role);
             if (!userInRole)
             {
                 await this.Context.UserRoles.AddAsync(
-                    new IdentityUserRole<string>()
-                    {
-                        RoleId = roleDb.Id,
-                        UserId = userDb.Id
-                    });
+                    new IdentityUserRole<string>() { RoleId = roleDb.Id, UserId = user.Id });
 
                 var result = await this.Context.SaveChangesAsync();
                 return result != 0;
@@ -188,9 +173,31 @@
             return false;
         }
 
-        public Task<bool> AddUserInRoleAsync(TUser user, IEnumerable<string> roles)
+        public async Task<bool> AddUserInRoleAsync(TUser user, IEnumerable<string> roles)
         {
-            return null;
+            if (!this.CheckDbUser(user))
+            {
+                return false;
+            }
+
+            if (!this.CheckDbRoles(roles))
+            {
+                return false;
+            }
+
+            var rolesDbIds = this.Context.Roles.Where(r => roles.Contains(r.Name)).Select(r => r.Id);
+
+            foreach (var rolesDbId in rolesDbIds)
+            {
+                if (!this.Context.UserRoles.Any(ur => ur.UserId == user.Id && ur.RoleId == rolesDbId))
+                {
+                    await this.Context.UserRoles.AddAsync(
+                        new IdentityUserRole<string>() { UserId = user.Id, RoleId = rolesDbId });
+                }
+            }
+
+            var result = await this.Context.SaveChangesAsync();
+            return result != 0;
         }
 
         public async Task<bool> ChangePasswordAsync(TUser user, string oldPassword, string newPassword)
@@ -204,32 +211,22 @@
             return await this.UserManager.CheckPasswordAsync(user, password);
         }
 
-        public async Task<bool> RemoveUserAsync(TUser user)
+        public async Task<bool> CheckUserInRoleAsync(TUser user, string role)
         {
-            if (user == null)
+            if (!this.CheckDbUser(user))
             {
                 return false;
             }
 
-            var result = await this.UserManager.DeleteAsync(user);
-            return result.Succeeded;
-        }
-
-        public async Task<bool> RemoveUserAsync(string email)
-        {
-            if (string.IsNullOrEmpty(email))
+            if (!this.CheckDbRole(role))
             {
                 return false;
             }
 
-            var user = this.GetUser(email);
+            var roleDb = this.Context.Roles.FirstOrDefault(r => string.CompareOrdinal(r.Name, role) == 0);
 
-            if (user == null)
-            {
-                return false;
-            }
-
-            return await this.RemoveUserAsync(user);
+            var userRole = this.Context.UserRoles.FirstOrDefault(ur => ur.UserId == user.Id && ur.RoleId == roleDb.Id);
+            return userRole != null;
         }
 
         public IQueryable<string> GetAllRoles() => this.Context.Roles.Select(r => r.Name);
@@ -285,12 +282,9 @@
                 return false;
             }
 
-            foreach (var role in roles)
+            if (roles.Any(string.IsNullOrEmpty))
             {
-                if (string.IsNullOrEmpty(role))
-                {
-                    return false;
-                }
+                return false;
             }
 
             if (roles.All(role => !this.GetAllUsersinRole(role).Any()))
@@ -303,6 +297,112 @@
             }
 
             return false;
+        }
+
+        public async Task<bool> RemoveUserAsync(TUser user)
+        {
+            if (user == null)
+            {
+                return false;
+            }
+
+            var result = await this.UserManager.DeleteAsync(user);
+            return result.Succeeded;
+        }
+
+        public async Task<bool> RemoveUserAsync(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return false;
+            }
+
+            var user = this.GetUser(email);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            return await this.RemoveUserAsync(user);
+        }
+
+        public async Task<bool> RemoveUserAsync(IEnumerable<TUser> users)
+        {
+            if (users == null)
+            {
+                return false;
+            }
+
+            if (users.Count() == 0)
+            {
+                return false;
+            }
+
+            foreach (var user in users)
+            {
+                var result = await this.RemoveUserAsync(user);
+
+                if (!result)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public async Task<bool> RemoveUserFromRoleAsync(TUser user, string role)
+        {
+            if (!this.CheckDbUser(user))
+            {
+                return false;
+            }
+
+            if (!this.CheckDbRole(role))
+            {
+                return false;
+            }
+
+            var res = await this.CheckUserInRoleAsync(user, role);
+            if (res == false)
+            {
+                return false;
+            }
+
+            var roleDb = this.Context.Roles.First(r => string.CompareOrdinal(r.Name, role) == 0);
+            var userRole = this.Context.UserRoles.FirstOrDefault(ur => ur.RoleId == roleDb.Id && ur.UserId == user.Id);
+            this.Context.UserRoles.Remove(userRole);
+
+            var result = await this.Context.SaveChangesAsync();
+            return result != 0;
+        }
+
+        public async Task<bool> RemoveUserFromRoleAsync(TUser user, IEnumerable<string> roles)
+        {
+            if (!this.CheckDbUser(user))
+            {
+                return false;
+            }
+
+            if (!this.CheckDbRoles(roles))
+            {
+                return false;
+            }
+
+            var rolesDbIds = this.Context.Roles.Where(r => roles.Contains(r.Name)).Select(r => r.Id);
+            var userRolesDb = this.Context.UserRoles.Where(ur => ur.UserId == user.Id);
+
+            foreach (var userRoleDb in userRolesDb)
+            {
+                if (rolesDbIds.Contains(userRoleDb.RoleId))
+                {
+                    this.Context.UserRoles.Remove(userRoleDb);
+                }
+            }
+
+            var result = await this.Context.SaveChangesAsync();
+            return result != 0;
         }
 
         public async Task<bool> ResetPasswordAsync(TUser user, string passwordAnswer, string newPassword)
@@ -375,86 +475,43 @@
             return result.Succeeded;
         }
 
-        public async Task<bool> RemoveUserAsync(IEnumerable<TUser> users)
+        private bool CheckDbRole(string role)
         {
-            if (users == null)
+            if (string.IsNullOrEmpty(role))
             {
                 return false;
             }
 
-            if (users.Count() == 0)
+            var roleDb = this.Context.Roles.FirstOrDefault(r => string.CompareOrdinal(role, r.Name) == 0);
+            return roleDb != null;
+        }
+
+        private bool CheckDbRoles(IEnumerable<string> roles)
+        {
+            if (roles == null)
             {
                 return false;
             }
 
-            foreach (var user in users)
-            {
-                var result = await this.RemoveUserAsync(user);
-
-                if (!result)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public async Task<bool> RemoveUserFromRoleAsync(TUser user, string role)
-        {
-            // todo: check this
-            //var res = await this.CheckUserInRoleAsync(user, role);
-            //if (res == false)
-            //{
-            //    return false;
-            //}
-
-            var userDb = this.GetUser(user.Email);
-            var roleDb = this.Context.Roles.First(r => string.CompareOrdinal(r.Name, role) == 0);
-
-            var userRole = this.Context.UserRoles.FirstOrDefault(ur => ur.RoleId == roleDb.Id && ur.UserId == userDb.Id);
-
-            if (userRole == null)
+            if (!roles.Any())
             {
                 return false;
             }
 
-            this.Context.UserRoles.Remove(userRole);
-
-            var result = await this.Context.SaveChangesAsync();
-            return result != 0;
+            return !roles.Any(string.IsNullOrEmpty)
+                   && roles.All(
+                       role => this.Context.Roles.FirstOrDefault(r => string.CompareOrdinal(r.Name, role) == 0) != null);
         }
 
-        public Task<bool> RemoveUserFromRoleAsync(TUser user, IEnumerable<string> roles)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<bool> CheckUserInRoleAsync(TUser user, string role)
+        private bool CheckDbUser(TUser user)
         {
             if (user == null)
             {
                 return false;
             }
 
-            var userDb = this.GetUser(user.Email);
-            if (userDb == null)
-            {
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(role))
-            {
-                return false;
-            }
-
-            var roleDb = this.Context.Roles.First(r => string.CompareOrdinal(r.Name, role) == 0);
-            if (roleDb == null)
-            {
-                return false;
-            }
-
-            return await this.UserManager.IsInRoleAsync(user, role);
+            var userDb = this.Context.Users.FirstOrDefault(u => u.Id == user.Id);
+            return userDb != null;
         }
     }
 }
