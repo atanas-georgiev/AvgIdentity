@@ -6,15 +6,19 @@
 
     public class AvgIdentityUser : IdentityUser
     {
-        [MaxLength(100)]
+        public const int FirstNameMaxLen = 100;
+        public const int LastNameMaxLen = 100;
+        public const int PasswordQuestionMaxLen = 100;
+
+        [MaxLength(FirstNameMaxLen)]
         public string FirstName { get; set; }
 
-        [MaxLength(100)]
+        [MaxLength(LastNameMaxLen)]
         public string LastName { get; set; }
 
         public string PasswordAnswerHash { get; set; }
 
-        [MaxLength(100)]
+        [MaxLength(PasswordQuestionMaxLen)]
         public string PasswordQuestion { get; set; }
     }
 }

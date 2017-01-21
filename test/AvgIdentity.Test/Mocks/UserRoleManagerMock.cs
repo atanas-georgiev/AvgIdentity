@@ -1,26 +1,24 @@
-﻿using AvgIdentity.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features.Authentication;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using AvgIdentity.Managers;
-using System;
-using System.Linq;
-
-namespace AvgIdentity.Test.Mocks
+﻿namespace AvgIdentity.Test.Mocks
 {
+    using System;
+    using System.Linq;
+
+    using AvgIdentity.Managers;
+    using AvgIdentity.Models;
+
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Features.Authentication;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.Extensions.DependencyInjection;
+
     internal class UserRoleManagerMock : IDisposable
     {
-        private UserManager<AvgIdentityUser> userManager { get; set; }
+        private SignInManager<AvgIdentityUser> signInManager;
 
         private TestInMemoryIdentityDbContext testDbContext;
-
-        public UserRoleManager<AvgIdentityUser, TestInMemoryIdentityDbContext> userRoleManager { get; private set; }
-
-        private SignInManager<AvgIdentityUser> signInManager;
 
         public UserRoleManagerMock()
         {
@@ -41,10 +39,17 @@ namespace AvgIdentity.Test.Mocks
             this.testDbContext = serviceProvider.GetRequiredService<TestInMemoryIdentityDbContext>();
             this.userManager = serviceProvider.GetRequiredService<UserManager<AvgIdentityUser>>();
 
-            //this.signInManager = new SignInManager<AvgIdentityUser>();
-            //this.testDbContext = new TestInMemoryIdentityDbContext();
-            this.userRoleManager = new UserRoleManager<AvgIdentityUser, TestInMemoryIdentityDbContext>(this.userManager, null, this.testDbContext);
+            // this.signInManager = new SignInManager<AvgIdentityUser>();
+            // this.testDbContext = new TestInMemoryIdentityDbContext();
+            this.userRoleManager = new UserRoleManager<AvgIdentityUser, TestInMemoryIdentityDbContext>(
+                this.userManager,
+                null,
+                this.testDbContext);
         }
+
+        public UserRoleManager<AvgIdentityUser, TestInMemoryIdentityDbContext> userRoleManager { get; private set; }
+
+        private UserManager<AvgIdentityUser> userManager { get; set; }
 
         public void Dispose()
         {

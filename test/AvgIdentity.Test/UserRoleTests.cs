@@ -1,6 +1,7 @@
 ﻿namespace AvgIdentity.Test
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
     using AvgIdentity.Models;
@@ -30,6 +31,12 @@
                 Assert.IsTrue(res, "User is not added to role");
                 res = await userRoleManager.CheckUserInRoleAsync(user, "Role1");
                 Assert.IsTrue(res, "User is not added to role");
+                Assert.IsTrue(userRoleManager.GetAllRolesForUser(user).Count() == 1, "User is not added to role");
+                Assert.IsTrue(userRoleManager.GetAllRolesForUser(user).First() == "Role1", "User is not added to role");
+                Assert.IsTrue(userRoleManager.GetAllUsersInRole("Role1").Count() == 1, "User is not added to role");
+                Assert.IsTrue(
+                    userRoleManager.GetAllUsersInRole("Role1").First().Id == user.Id,
+                    "User is not added to role");
 
                 // Check if user is not in role
                 res = await userRoleManager.CheckUserInRoleAsync(user, "Role2");
@@ -169,6 +176,26 @@
                 user = new AvgIdentityUser() { Email = "notexisiting@mail.test" };
                 res = await userRoleManager.CheckUserInRoleAsync(user, "Role1");
                 Assert.IsFalse(res, "Check not existing user returns correct result");
+
+                // Check null user roles
+                var roles = userRoleManager.GetAllRolesForUser(null);
+                Assert.IsNull(roles, "Check null user roles returns correct result");
+
+                // Check not existing user roles
+                roles = userRoleManager.GetAllRolesForUser(user);
+                Assert.IsNull(roles, "Check not existing user roles returns correct result");
+
+                // Check users in null role
+                var users = userRoleManager.GetAllUsersInRole(null);
+                Assert.IsNull(users, "Check users in null role returns correct result");
+
+                // Check users in empty role
+                users = userRoleManager.GetAllUsersInRole(string.Empty);
+                Assert.IsNull(users, "Check users in empry role returns correct result");
+
+                // Check users in not existing role
+                users = userRoleManager.GetAllUsersInRole("Role5");
+                Assert.IsNull(users, "Check users in not existing role returns correct result");
             }
         }
 

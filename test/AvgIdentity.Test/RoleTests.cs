@@ -1,16 +1,18 @@
 ﻿namespace AvgIdentity.Test
 {
-    using AvgIdentity.Models;
-    using AvgIdentity.Test.Mocks;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+
+    using AvgIdentity.Test.Mocks;
+
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
     public class RoleTests
     {
         [TestMethod]
-        public async Task AddRolesShouldBehaveCorrectlyAsync()
+        public async Task AddRolesInvalidInputTestsAsync()
         {
             using (var userRoleManagerMock = new UserRoleManagerMock())
             {
@@ -37,6 +39,20 @@
                 Assert.IsFalse(res, "AddRoleAsync adds empty role");
                 Assert.IsTrue(!userRoleManager.GetAllRoles().Any(), "AddRoleAsync adds empty role");
 
+                res = await userRoleManager.AddRoleAsync(new List<string>());
+                Assert.IsFalse(res, "AddRoleAsync adds empty role");
+                Assert.IsTrue(!userRoleManager.GetAllRoles().Any(), "AddRoleAsync adds empty role");
+            }
+        }
+
+        [TestMethod]
+        public async Task AddRolesValidInputTestsAsync()
+        {
+            using (var userRoleManagerMock = new UserRoleManagerMock())
+            {
+                var userRoleManager = userRoleManagerMock.userRoleManager;
+                bool res;
+
                 res = await userRoleManager.AddRoleAsync("Role1");
                 Assert.IsTrue(res, "AddRoleAsync do not add role");
                 Assert.IsTrue(userRoleManager.GetAllRoles().Count() == 1, "AddRoleAsync do not add role");
@@ -51,17 +67,18 @@
 
                 res = await userRoleManager.AddRoleAsync(new[] { "Role3", "Role4" });
                 Assert.IsFalse(res, "AddRoleAsync do add multiple roles if role already exists");
-                Assert.IsTrue(userRoleManager.GetAllRoles().Count() == 3, "AddRoleAsync do add multiple roles if role already exists");
+                Assert.IsTrue(
+                    userRoleManager.GetAllRoles().Count() == 3,
+                    "AddRoleAsync do add multiple roles if role already exists");
             }
         }
 
         [TestMethod]
-        public async Task RemoveRolesShouldBehaveCorrectlyAsync()
+        public async Task RemoveRolesInvalidInputTestsAsync()
         {
             using (var userRoleManagerMock = new UserRoleManagerMock())
             {
                 var userRoleManager = userRoleManagerMock.userRoleManager;
-                AvgIdentityUser user;
                 bool res;
 
                 // Add test role
@@ -93,11 +110,26 @@
                 res = await userRoleManager.RemoveRoleAsync(new[] { "Role1", string.Empty });
                 Assert.IsFalse(res, "RemoveRoleAsync invalid remove null role");
                 Assert.IsTrue(userRoleManager.GetAllRoles().Count() == 1, "RemoveRoleAsync invalid remove null role");
+            }
+        }
+
+        [TestMethod]
+        public async Task RemoveRolesValidInputTestsAsync()
+        {
+            using (var userRoleManagerMock = new UserRoleManagerMock())
+            {
+                var userRoleManager = userRoleManagerMock.userRoleManager;
+                bool res;
+
+                // Add test role
+                res = await userRoleManager.AddRoleAsync("Role1");
+                Assert.IsTrue(res, "AddRoleAsync do not add role");
+                Assert.IsTrue(userRoleManager.GetAllRoles().Count() == 1, "AddRoleAsync do not add role");
 
                 // Remove existing role
                 res = await userRoleManager.RemoveRoleAsync("Role1");
                 Assert.IsTrue(res, "RemoveRoleAsync do not delete existing role");
-                Assert.IsTrue(userRoleManager.GetAllRoles().Count() == 0, "RemoveRoleAsync do not delete existing role");
+                Assert.IsTrue(!userRoleManager.GetAllRoles().Any(), "RemoveRoleAsync do not delete existing role");
 
                 // Add test roles
                 res = await userRoleManager.AddRoleAsync(new[] { "Role1", "Role2", "Role3" });
@@ -107,10 +139,19 @@
                 // Remove existing roles
                 res = await userRoleManager.RemoveRoleAsync(new[] { "Role1", "Role2" });
                 Assert.IsTrue(res, "RemoveRoleAsync do not delete existing roles");
-                Assert.IsTrue(userRoleManager.GetAllRoles().Count() == 1, "RemoveRoleAsync do not delete existing roles");
+                Assert.IsTrue(
+                    userRoleManager.GetAllRoles().Count() == 1,
+                    "RemoveRoleAsync do not delete existing roles");
 
                 // Add valid user
-                user = await userRoleManager.AddUserAsync("user3@test.com", "Password@1", "Question", "Answer", "FirstName", "LastName", "Role3");
+                var user = await userRoleManager.AddUserAsync(
+                               "user3@test.com",
+                               "Password@1",
+                               "Question",
+                               "Answer",
+                               "FirstName",
+                               "LastName",
+                               "Role3");
                 Assert.IsNotNull(user, "AddUserAsync do not add valid user");
                 Assert.IsTrue(userRoleManager.GetAllUsers().Count() == 1, "AddUserAsync do not add valid user");
 

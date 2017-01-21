@@ -16,11 +16,11 @@
 
         Task<bool> AddRoleAsync(string role);
 
-        Task<TUser> AddUserAsync(TUser user, string password, string role = null);
+        Task<TUser> AddUserAsync(TUser user, string password = null, string role = null);
 
         Task<TUser> AddUserAsync(
             string email,
-            string password,
+            string password = null,
             string question = null,
             string answer = null,
             string firstName = null,
@@ -41,9 +41,11 @@
 
         IQueryable<string> GetAllRoles();
 
+        IQueryable<string> GetAllRolesForUser(TUser user);
+
         IQueryable<TUser> GetAllUsers();
 
-        IQueryable<TUser> GetAllUsersinRole(string role);
+        IQueryable<TUser> GetAllUsersInRole(string role);
 
         TUser GetUser(string email);
 
