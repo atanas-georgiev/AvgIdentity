@@ -7,6 +7,7 @@
     using AvgIdentity.Managers;
     using AvgIdentity.Models;
 
+    using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Features.Authentication;
     using Microsoft.AspNetCore.Identity;
@@ -14,6 +15,7 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
 
     internal class IdentityTestContext : IDisposable
     {
@@ -40,6 +42,12 @@
             var userManager = serviceProvider.GetRequiredService<UserManager<AvgIdentityUser>>();
             var signInManager = serviceProvider.GetRequiredService<SignInManager<AvgIdentityUser>>();
             serviceProvider.GetRequiredService<SignInManager<AvgIdentityUser>>();
+
+            userManager.RegisterTokenProvider(
+                "Default",
+                new DataProtectorTokenProvider<AvgIdentityUser>(
+                    new EphemeralDataProtectionProvider(),
+                    new OptionsWrapper<DataProtectionTokenProviderOptions>(new DataProtectionTokenProviderOptions())));
 
             this.UserRoleManager = new UserRoleManager<AvgIdentityUser, IdentityTestInMemoryDbContext>(
                 userManager,
