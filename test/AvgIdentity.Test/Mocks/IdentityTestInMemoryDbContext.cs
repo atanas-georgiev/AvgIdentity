@@ -5,7 +5,7 @@
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
 
-    internal class TestInMemoryIdentityDbContext : IdentityDbContext<AvgIdentityUser>
+    internal class IdentityTestInMemoryDbContext : IdentityDbContext<AvgIdentityUser>
     {
         protected override void OnConfiguring(DbContextOptionsBuilder builder)
         {

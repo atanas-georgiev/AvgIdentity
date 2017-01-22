@@ -26,6 +26,51 @@
 
         protected UserManager<TUser> UserManager { get; set; }
 
+        public async Task<bool> AddPasswordToUserAsync(
+            TUser user,
+            string password,
+            string question = null,
+            string answer = null)
+        {
+            if (!this.CheckDbUser(user))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                return false;
+            }
+
+            if (question != null && answer != null)
+            {
+                if (string.CompareOrdinal(question, string.Empty) == 0
+                    || string.CompareOrdinal(answer, string.Empty) == 0)
+                {
+                    return false;
+                }
+
+                user.PasswordQuestion = question;
+                user.PasswordAnswerHash = answer;
+
+                var hasher = new PasswordHasher<TUser>();
+                if (!string.IsNullOrEmpty(user.PasswordAnswerHash))
+                {
+                    user.PasswordAnswerHash = hasher.HashPassword(user, user.PasswordAnswerHash);
+                }
+
+                if (!this.CheckDbUser(user))
+                {
+                    return false;
+                }
+
+                await this.UpdateUserAsync(user);
+            }
+
+            var result = await this.UserManager.AddPasswordAsync(user, password);
+            return result.Succeeded;
+        }
+
         public async Task<bool> AddRoleAsync(IEnumerable<string> roles)
         {
             if (!this.CheckNonDbRoles(roles))
@@ -176,12 +221,32 @@
 
         public async Task<bool> ChangePasswordAsync(TUser user, string oldPassword, string newPassword)
         {
+            if (!this.CheckDbUser(user))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(oldPassword) || string.IsNullOrEmpty(newPassword))
+            {
+                return false;
+            }
+
             var result = await this.UserManager.ChangePasswordAsync(user, oldPassword, newPassword);
             return result.Succeeded;
         }
 
         public async Task<bool> CheckPasswordAsync(TUser user, string password)
         {
+            if (!this.CheckDbUser(user))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                return false;
+            }
+
             return await this.UserManager.CheckPasswordAsync(user, password);
         }
 
@@ -230,6 +295,16 @@
         }
 
         public TUser GetUser(string email) => this.UserManager.Users.FirstOrDefault(u => u.Email == email);
+
+        public async Task<bool> HasPasswordAsync(TUser user)
+        {
+            if (!this.CheckDbUser(user))
+            {
+                return false;
+            }
+
+            return await this.UserManager.HasPasswordAsync(user);
+        }
 
         public async Task<bool> RemoveRoleAsync(string role)
         {
@@ -366,6 +441,16 @@
 
         public async Task<bool> ResetPasswordAsync(TUser user, string passwordAnswer, string newPassword)
         {
+            if (!this.CheckDbUser(user))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(passwordAnswer) || string.IsNullOrEmpty(newPassword))
+            {
+                return false;
+            }
+
             var hasher = new PasswordHasher<TUser>();
             var isPasswordCorrect = hasher.VerifyHashedPassword(user, user.PasswordAnswerHash, passwordAnswer);
 

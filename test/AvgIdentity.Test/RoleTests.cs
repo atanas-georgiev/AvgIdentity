@@ -14,9 +14,9 @@
         [TestMethod]
         public async Task AddRolesInvalidInputTestsAsync()
         {
-            using (var userRoleManagerMock = new UserRoleManagerMock())
+            using (var userRoleManagerMock = new IdentityTestContext())
             {
-                var userRoleManager = userRoleManagerMock.userRoleManager;
+                var userRoleManager = userRoleManagerMock.UserRoleManager;
                 bool res;
 
                 res = await userRoleManager.AddRoleAsync(role: null);
@@ -48,9 +48,9 @@
         [TestMethod]
         public async Task AddRolesValidInputTestsAsync()
         {
-            using (var userRoleManagerMock = new UserRoleManagerMock())
+            using (var userRoleManagerMock = new IdentityTestContext())
             {
-                var userRoleManager = userRoleManagerMock.userRoleManager;
+                var userRoleManager = userRoleManagerMock.UserRoleManager;
                 bool res;
 
                 res = await userRoleManager.AddRoleAsync("Role1");
@@ -76,9 +76,9 @@
         [TestMethod]
         public async Task RemoveRolesInvalidInputTestsAsync()
         {
-            using (var userRoleManagerMock = new UserRoleManagerMock())
+            using (var userRoleManagerMock = new IdentityTestContext())
             {
-                var userRoleManager = userRoleManagerMock.userRoleManager;
+                var userRoleManager = userRoleManagerMock.UserRoleManager;
                 bool res;
 
                 // Add test role
@@ -116,9 +116,9 @@
         [TestMethod]
         public async Task RemoveRolesValidInputTestsAsync()
         {
-            using (var userRoleManagerMock = new UserRoleManagerMock())
+            using (var userRoleManagerMock = new IdentityTestContext())
             {
-                var userRoleManager = userRoleManagerMock.userRoleManager;
+                var userRoleManager = userRoleManagerMock.UserRoleManager;
                 bool res;
 
                 // Add test role

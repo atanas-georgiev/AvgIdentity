@@ -12,6 +12,7 @@
     <EmbeddedResource Include="**\*.resx" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="1.1.0" />
     <PackageReference Include="Microsoft.CodeCoverage" Version="1.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="1.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170113-02" />
