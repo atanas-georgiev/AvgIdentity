@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="1.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170113-02" />
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.1.0</Version>
+      <Version>2.0.3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Sdk">
       <Version>1.0.0-alpha-20161104-2</Version>
